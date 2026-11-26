@@ -20,6 +20,7 @@ To update or roll back, change the tag in Webflow. Never move or reuse an existi
 On *.webflow.io the engine shows a check box only when a run script check fails or warns. Add `?fmrun-check` to any page URL to see the full report.
 
 ## Changelog
+- v1.3.2: softer dark for the Linear screen (blue-gray instead of near-black), so it sits better next to the light app screens.
 - v1.3.1: ticket frame with Zendesk skin, HubSpot skin for crm-record, IssueRecord component with Linear skin (dark), player fix for a freeze on the first frame, Slack buttons only on the latest app message, Slack @mentions, compact card fields for text values, numbered rules in the agent workspace.
 - v1.3.0: post-list and crm-lookup frames, CampaignLeads component, Attio, Lemlist and Slack skins, hero.step, streaming lists, counters, play/pause.
 - v1.2.3: first release.
