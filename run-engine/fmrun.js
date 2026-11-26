@@ -1,8 +1,8 @@
-/*! FlowMate run animation engine v1.3.2. Plays a run script (run-script-spec.md) from the page's CMS data. */
+/*! FlowMate run animation engine v1.3.3. Plays a run script (run-script-spec.md) from the page's CMS data. */
 (function () {
   'use strict';
   if (window.FMRun) return;
-  var VERSION = '1.3.2';
+  var VERSION = '1.3.3';
   var APPS = { flowmate: { n: 'FlowMate', fm: true } };
   var CAST = {};
   var WS = { n: 'Brindlewood', logo: '' };
@@ -41,6 +41,9 @@
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const svg = (d, s, c, w) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="' + d + '"/></svg>';
 const SP = 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z';
+// Agents and Flows icons, one colour, from the Home "difference" section (48px grid).
+const agentIc = (s, c) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 48 48" fill="none" stroke="' + c + '" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M15 11H33A9 9 0 0 1 42 20V32A9 9 0 0 1 33 41H15A9 9 0 0 1 6 32V20A9 9 0 0 1 15 11ZM24 11V6M6 26H2M42 26H46"/><circle cx="24" cy="4" r="2.8" fill="' + c + '" stroke="none"/><circle cx="18" cy="26" r="3.8" fill="' + c + '" stroke="none"/><circle cx="30" cy="26" r="3.8" fill="' + c + '" stroke="none"/></svg>';
+const flowIc = (s, c) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 48 48" fill="none" stroke="' + c + '" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M14 24H22C26 24 26 12 30 12H33M22 24C26 24 26 36 30 36H33"/><circle cx="9" cy="24" r="5"/><circle cx="38" cy="12" r="5" fill="' + c + '" stroke="none"/><circle cx="38" cy="36" r="5" fill="' + c + '" stroke="none"/></svg>';
 const CHECK = 'M5 12l5 5L20 7';
 const fmLogo = (s) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 256 256" aria-hidden="true" style="flex:none"><rect width="256" height="256" rx="128" fill="#6557FF"/><path fill="#fff" d="M121.4 73.1C122.9 74.6 123.8 76.7 123.8 78.8L123.8 132.2C123.8 143.6 114.5 152.8 103.2 152.8C91.8 152.8 82.5 143.6 82.5 132.2L82.5 113.5C82.5 110.9 80.4 108.8 77.8 108.8C75.2 108.8 73.1 110.9 73.1 113.5L73.1 132.2C73.1 143.6 63.9 152.8 52.5 152.8C41.1 152.8 31.9 143.6 31.9 132.2L31.9 112.1C31.9 107.7 35.4 104.1 39.9 104.1C44.3 104.1 47.8 107.7 47.8 112.1L47.8 136.9C47.8 139.5 49.9 141.6 52.5 141.6C55.1 141.6 57.2 139.5 57.2 136.9L57.2 115.3C57.2 103.9 66.4 94.7 77.8 94.7C89.2 94.7 98.5 103.9 98.5 115.3L98.5 136.9C98.5 139.5 100.6 141.6 103.2 141.6C105.7 141.6 107.8 139.5 107.8 136.9L107.8 78.8C107.8 74.4 111.4 70.8 115.8 70.8C117.9 70.8 120 71.6 121.4 73.1ZM134.6 182.4C133.1 180.9 132.2 178.8 132.2 176.7L132.2 115.3C132.2 103.9 141.5 94.7 152.8 94.7C164.2 94.7 173.5 103.9 173.5 115.3L173.5 134.1C173.5 136.7 175.6 138.8 178.2 138.8C180.8 138.8 182.9 136.7 182.9 134.1L182.9 115.3C182.9 103.9 192.1 94.7 203.5 94.7C214.9 94.7 224.1 103.9 224.1 115.3L224.1 135.4C224.1 139.8 220.6 143.4 216.1 143.4C211.7 143.4 208.2 139.8 208.2 135.4L208.2 110.7C208.2 108.1 206.1 106 203.5 106C200.9 106 198.8 108.1 198.8 110.7L198.8 132.2C198.8 143.6 189.6 152.8 178.2 152.8C166.8 152.8 157.5 143.6 157.5 132.2L157.5 110.7C157.5 108.1 155.4 106 152.8 106C150.3 106 148.2 108.1 148.2 110.7L148.2 176.7C148.2 181.1 144.6 184.7 140.2 184.7C138.1 184.7 136 183.9 134.6 182.4Z"/></svg>';
 const appChip = (slug, s) => {
@@ -685,8 +688,8 @@ function renderFrame(step, V) {
 }
 
 const BADGE = {
-  agent: () => '<span class="fmrun-badge fmrun-b-agent">' + svg(SP, 14, '#6557FF', 2.2) + 'Agent deciding</span>',
-  rules: () => '<span class="fmrun-badge fmrun-b-rules">' + svg(CHECK, 14, 'currentColor', 2.6) + 'Following your rules</span>',
+  agent: () => '<span class="fmrun-badge fmrun-b-agent">' + agentIc(16, '#6557FF') + 'Agent deciding</span>',
+  rules: () => '<span class="fmrun-badge fmrun-b-rules">' + flowIc(16, 'currentColor') + 'Following your rules</span>',
   end: (txt) => {
     const cls = /review/i.test(txt) ? 'fmrun-b-review' : /done/i.test(txt) ? 'fmrun-b-done' : 'fmrun-b-ready';
     const icon = /review/i.test(txt) ? svg('M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z', 14, 'currentColor', 2.2) : svg(CHECK, 14, 'currentColor', 2.6);
@@ -725,7 +728,7 @@ function renderCard(s, state) {
     let inner = '<div class="fmrun-verb">' + esc(st.title) + '</div><div class="fmrun-in"><span style="display:flex;align-items:center;gap:5px">in ' + appChip(st.app, 14) + '<b>' + esc(app.n) + '</b></span>' + (st.skill ? '<span class="fmrun-skill">Skill: ' + esc(st.skill) + '</span>' : '') + '</div>';
     if (run) {
       inner += '<div class="fmrun-uses">' + (st.uses || []).map((u) => '<span class="fmrun-use">' + svg('M12 5v14M5 12l7 7 7-7', 11, '#1E9E6E', 3) + esc(u) + '</span>').join('') + '</div>' +
-        st.lines.map((l, j) => '<div class="fmrun-ln ' + (l.type === 'judgment' ? 'fmrun-j' : 'fmrun-r') + (j === active ? ' fmrun-cur' : '') + (j > active ? ' fmrun-pending' : '') + '"><span>' + (l.type === 'judgment' ? svg(SP, 13, '#6557FF', 2.2) : svg('M5 12h14M13 6l6 6-6 6', 13, '#A3A5B6', 2.4)) + '<span class="fmrun-lt">' + esc(l.text) + '</span></span></div>').join('');
+        st.lines.map((l, j) => '<div class="fmrun-ln ' + (l.type === 'judgment' ? 'fmrun-j' : 'fmrun-r') + (j === active ? ' fmrun-cur' : '') + (j > active ? ' fmrun-pending' : '') + '"><span>' + (l.type === 'judgment' ? agentIc(14, '#6557FF') : svg('M5 12h14M13 6l6 6-6 6', 13, '#A3A5B6', 2.4)) + '<span class="fmrun-lt">' + esc(l.text) + '</span></span></div>').join('');
     }
     if (done) inner += '<div class="fmrun-res">' + esc(st.result) + '</div>';
     return '<div class="fmrun-row ' + (run ? 'fmrun-run' : done ? 'fmrun-done' : 'fmrun-wait') + '" data-i="' + i + '" role="button" tabindex="0" aria-label="' + esc('Play from step ' + (i + 1) + ': ' + st.title) + '"><div class="fmrun-ico">' + icon + '</div><div class="fmrun-rt">' + inner + '</div></div>';
