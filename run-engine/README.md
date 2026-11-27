@@ -20,6 +20,7 @@ To update or roll back, change the tag in Webflow. Never move or reuse an existi
 On *.webflow.io the engine shows a check box only when a run script check fails or warns. Add `?fmrun-check` to any page URL to see the full report.
 
 ## Changelog
+- v1.3.4: InvoiceList component with Xero skin (invoice list with streaming rows, tab counter, one highlight around the invoices due, "Paid late" annotation pills), Outlook skin for the email frame (folders, Sent Items list with item-n keys, reading pane with "Sent" chip, app icon on a white tile), HubSpot activity timeline when a record has a note (Notes tab, light red note card, optional second entry), inputs on the Slack card (date picker, key "inputs"). First used by "Chase overdue invoices".
 - v1.3.3: FlowMate Agents icon (robot) on the "Agent deciding" badge and on judgment lines, Flows icon on the "Following your rules" badge, matching the Home.
 - v1.3.2: softer dark for the Linear screen (blue-gray instead of near-black), so it sits better next to the light app screens.
 - v1.3.1: ticket frame with Zendesk skin, HubSpot skin for crm-record, IssueRecord component with Linear skin (dark), player fix for a freeze on the first frame, Slack buttons only on the latest app message, Slack @mentions, compact card fields for text values, numbered rules in the agent workspace.
