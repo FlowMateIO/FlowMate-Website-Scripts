@@ -1,8 +1,8 @@
-/*! FlowMate run animation engine v1.3.3. Plays a run script (run-script-spec.md) from the page's CMS data. */
+/*! FlowMate run animation engine v1.3.4. Plays a run script (run-script-spec.md) from the page's CMS data. */
 (function () {
   'use strict';
   if (window.FMRun) return;
-  var VERSION = '1.3.3';
+  var VERSION = '1.3.4';
   var APPS = { flowmate: { n: 'FlowMate', fm: true } };
   var CAST = {};
   var WS = { n: 'Brindlewood', logo: '' };
@@ -260,7 +260,8 @@ function slackChat(c, V, step) {
       (cd.title ? '<div style="font-weight:800;font-size:13px;margin-bottom:8px">' + esc(cd.title) + '</div>' : '') +
       (cd.fields ? '<div style="display:grid;grid-template-columns:repeat(' + cd.fields.length + ',minmax(0,1fr));gap:6px;margin-bottom:8px">' + cd.fields.map((f) => { const big = cd.fields.every((x) => String(x.value).length <= 5); return '<div style="background:#F8F8F8;border-radius:6px;padding:' + (big ? '7px 9px' : '5px 8px') + '"><div style="font-size:10.5px;color:#616061">' + esc(f.label) + '</div><div style="font-size:' + (big ? 17 : 13) + 'px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums">' + esc(f.value) + '</div></div>'; }).join('') + '</div>' : '') +
       (cd.rows || []).map((r) => '<div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px">' + initials(r.name, 20) + '<b style="font-weight:700">' + esc(r.name) + '</b><span style="color:#616061;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(r.detail) + '</span>' + (r.score ? '<span class="fmrun-pill fmrun-p-ok" style="margin-left:auto">' + esc(r.score) + '</span>' : '') + '</div>').join('') +
-      (cd.note ? '<div style="margin-top:9px;font-size:12.5px;color:#1D1C1D">' + esc(cd.note) + '</div>' : '') + '</div>' : '';
+      (cd.note ? '<div style="margin-top:9px;font-size:12.5px;color:#1D1C1D;line-height:1.45">' + esc(cd.note) + '</div>' : '') +
+      (cd.inputs ? '<div class="' + V.cls('inputs') + '" style="display:flex;gap:10px;margin-top:10px;padding:2px">' + cd.inputs.map((inp) => '<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:11.5px;font-weight:800;color:#1D1C1D">' + esc(inp.label) + '</span><span style="display:inline-flex;align-items:center;gap:7px;border:1px solid #BBBABB;border-radius:5px;padding:5px 10px;font-size:12.5px;color:#1D1C1D;background:#fff">' + ic('M4 6h16v14H4zM4 10h16M9 3v4M15 3v4', 13) + esc(inp.value) + '</span></div>').join('') + '</div>' : '') + '</div>' : '';
     const acts = isApp && c.actions && i === (c.messages || []).map((x) => !!x.app || /flowmate/i.test(x.author || '')).lastIndexOf(true) ? '<div class="' + V.cls('actions') + '" style="display:flex;gap:8px;margin-top:8px">' + c.actions.map((a, j) => '<span class="fmrun-act" style="font-weight:700;font-size:12.5px;padding:5px 12px;border-radius:6px;border:1px solid ' + (j === 0 ? '#007A5A' : '#BBBABB') + ';background:' + (j === 0 ? '#007A5A' : '#fff') + ';color:' + (j === 0 ? '#fff' : '#1D1C1D') + '">' + esc(a) + '</span>').join('') + '</div>' : '';
     const day = m.day ? '<div class="fmrun-sl-day"><span>' + esc(m.day) + '</span></div>' : '';
     return day + '<div class="' + V.cls('message-' + (i + 1)) + '" style="display:flex;gap:9px;align-items:flex-start;padding:6px 18px">' + avatarHtml + '<div style="min-width:0;flex:1">' + head + '<div style="font-size:13.5px;line-height:1.46;color:#1D1C1D;margin-top:1px">' + esc(m.text).replace(/@([A-Z][a-z]+(?: [A-Z][a-z]+)?)/g, '<span style="color:#1264A3;background:rgba(29,155,209,.12);border-radius:3px;padding:0 2px;font-weight:600">@$1</span>') + '</div>' + card + acts + '</div></div>';
@@ -612,12 +613,29 @@ function hubspotRecord(c, V, step) {
   const left = '<div style="width:196px;flex:none;display:flex;flex-direction:column;gap:8px;min-height:0">' + head + aboutCard + '</div>';
   const tab = (t, on) => '<span style="flex:1;text-align:center;padding:8px 0;font-size:12px;color:' + INK + ';' + (on ? 'background:#fff;font-weight:700' : 'background:#F5F8FA') + ';border-right:1px solid ' + LINE + '">' + esc(t) + '</span>';
   const hl = (l, v) => '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:10px;color:' + SUB + ';text-transform:uppercase;letter-spacing:.04em">' + esc(l) + '</span><span style="font-size:12.5px;color:' + INK + ';font-weight:600;display:flex;align-items:center;gap:5px">' + v + '</span></div>';
-  const mid = '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">' +
+  const nt = c.note;
+  const TEAL = '#0091AE';
+  const midNote = nt ? '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">' + card('<div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:9px;min-height:0">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center"><span style="display:flex;align-items:center;gap:6px;border:1px solid #CBD6E2;border-radius:4px;padding:4px 9px;font-size:11.5px;color:' + SUB + '">Search activities' + lic(IC.search, 11, TEAL) + '</span><span style="font-size:11px;font-weight:600;color:' + INK + ';background:#EAF0F6;border:1px solid #CBD6E2;border-radius:4px;padding:4px 9px">Collapse all ▾</span></div>' +
+      '<div style="display:flex;gap:14px;border-bottom:1px solid ' + LINE + ';font-size:12px;color:' + INK + '">' + ['Activity', 'Notes', 'Emails', 'Calls', 'Tasks', 'Meetings'].map((t) => '<span style="padding:6px 1px;' + (t === 'Notes' ? 'font-weight:700;box-shadow:inset 0 -2px 0 ' + INK : 'color:' + SUB) + '">' + t + '</span>').join('') + '</div>' +
+      '<div style="font-size:11px;color:' + SUB + '">Filter by: <span style="color:' + TEAL + ';font-weight:600">Filter activity (14/22) ▾</span>&nbsp;&nbsp;<span style="color:' + TEAL + ';font-weight:600">All users ▾</span></div>' +
+      '<b style="font-size:12px;color:' + INK + '">' + esc(nt.month || 'November 2026') + '</b>' +
+      (V.on('note')
+        ? '<div class="' + V.mark('note') + V.enter('note') + '" style="border:1px solid rgba(242,84,91,.45);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:5px;background:rgba(242,84,91,.06)"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:' + INK + ';white-space:nowrap">' + avatar(c.owner, 16) + '<span><b>Note</b> by ' + esc(owner.n) + '</span><span style="margin-left:auto;color:' + SUB + '">' + esc(nt.meta) + '</span></div><b style="font-size:12.5px;color:' + INK + '">' + esc(nt.title) + '</b>' + nt.lines.map((l) => '<span style="font-size:12px;line-height:1.45;color:' + INK + '">' + esc(l) + '</span>').join('') + '</div>'
+        : '<div style="border:1px solid ' + LINE + ';border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:7px"><span class="fmrun-sk" style="width:45%"></span><span class="fmrun-sk" style="width:85%"></span><span class="fmrun-sk" style="width:70%"></span></div>') +
+      (nt.next ? '<div style="border:1px solid ' + LINE + ';border-radius:4px;padding:9px 12px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;color:' + SUB + '"><span style="color:' + INK + '"><b>' + esc(nt.next.kind) + '</b> by ' + esc(nt.next.by) + '</span><span style="white-space:nowrap">' + esc(nt.next.when) + '</span></div><span style="font-size:12px;color:' + TEAL + '">' + esc(nt.next.title) + '</span></div>' : '') +
+      '</div>', 'flex:1;min-height:0;overflow:hidden') + '</div>' : '';
+  const mid = nt ? midNote : '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">' +
     card('<div style="display:flex">' + tab('Overview', true) + tab('Activities') + tab('Intelligence') + '</div>', 'overflow:hidden') +
     card('<div style="padding:12px;display:flex;flex-direction:column;gap:10px"><b style="font-size:12.5px;color:' + INK + '">Data highlights</b><div style="display:flex;gap:10px">' + hl('Lifecycle stage', 'Customer') + hl('Company owner', avatar(c.owner, 18) + esc(owner.n)) + hl('Last activity', 'Today') + '</div></div>') +
+    (c.note ? card('<div style="padding:12px;display:flex;flex-direction:column;gap:9px"><b style="font-size:12.5px;color:' + INK + '">Recent activities</b>' +
+      (V.on('note')
+        ? '<div class="' + V.mark('note') + V.enter('note') + '" style="border:1px solid ' + LINE + ';border-radius:6px;padding:10px 11px;display:flex;flex-direction:column;gap:5px;background:#fff"><span style="display:flex;align-items:center;gap:6px;font-size:11px;color:' + SUB + '">' + lic(IC.note, 11) + esc(c.note.meta) + '</span><b style="font-size:12.5px;color:' + INK + '">' + esc(c.note.title) + '</b>' + c.note.lines.map((l) => '<span style="font-size:12px;line-height:1.45;color:' + INK + '">' + esc(l) + '</span>').join('') + '</div>'
+        : '<div style="border:1px solid ' + LINE + ';border-radius:6px;padding:9px;display:flex;flex-direction:column;gap:6px"><span class="fmrun-sk" style="width:45%"></span><span class="fmrun-sk" style="width:85%"></span><span class="fmrun-sk" style="width:70%"></span></div>') +
+      '<div style="border:1px solid ' + LINE + ';border-radius:6px;padding:9px;display:flex;flex-direction:column;gap:6px"><span style="font-size:11px;color:' + INK + '"><b>Email</b> by Priya Rao</span><span class="fmrun-sk" style="width:65%"></span></div></div>', 'flex:1;min-height:0;overflow:hidden') :
     card('<div style="padding:12px;display:flex;flex-direction:column;gap:9px"><b style="font-size:12.5px;color:' + INK + '">Recent activities</b>' +
       '<div style="border:1px solid ' + LINE + ';border-radius:6px;padding:9px;display:flex;flex-direction:column;gap:6px"><span style="font-size:11px;color:' + INK + '"><b>Renewal call</b> by Tom Becker</span><span class="fmrun-sk" style="width:80%"></span></div>' +
-      '<div style="border:1px solid ' + LINE + ';border-radius:6px;padding:9px;display:flex;flex-direction:column;gap:6px"><span style="font-size:11px;color:' + INK + '"><b>Email</b> by Maya Singh</span><span class="fmrun-sk" style="width:65%"></span></div></div>', 'flex:1;min-height:0;overflow:hidden') + '</div>';
+      '<div style="border:1px solid ' + LINE + ';border-radius:6px;padding:9px;display:flex;flex-direction:column;gap:6px"><span style="font-size:11px;color:' + INK + '"><b>Email</b> by Maya Singh</span><span class="fmrun-sk" style="width:65%"></span></div></div>', 'flex:1;min-height:0;overflow:hidden')) + '</div>';
   const side = (title, inner) => card('<div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:' + INK + '"><b>⌄ ' + esc(title) + '</b><span style="font-size:11px;font-weight:600">+ Add</span></div>' + inner + '</div>');
   const cName = contactF ? contactF.value.split(',')[0] : '';
   const cRole = contactF ? (contactF.value.split(',')[1] || '').trim() : '';
@@ -678,6 +696,80 @@ function linearIssue(c, V, step) {
 }
 FRAMES.IssueRecord = linearIssue;
 SKINS.IssueRecord = { linear: linearIssue };
+
+/* ---------- InvoiceList (custom, candidate frame type "invoice-list"): Xero ---------- */
+/* Keys: stream (the list runs while that line is active), count (counter in the tab), due (one highlight around the
+   invoices due a reminder, which come first in rows), history (the "Paid late" column appears), row-n. */
+function xeroInvoices(c, V, step) {
+  const BAR = '#0B86CC', ORG = '#0A6FAD', BLUE = '#0B78BE', LINE = '#E3E6E8', INK = '#1E2A33', SUB = '#5F6D78', RED = '#C9372C';
+  const cnt = c.count || {};
+  const showH = V.on('history');
+  const grid = 'grid-template-columns:18px 78px minmax(0,1.4fr) 64px 112px 58px 82px';
+  const box = '<span style="width:12px;height:12px;border:1px solid #C8CDD1;border-radius:2px;display:block"></span>';
+  const head = '<div style="display:grid;' + grid + ';gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid ' + LINE + ';font-size:12px;font-weight:700;color:' + BLUE + '">' + box + '<span>Number</span><span>To</span><span>Date</span><span>Due Date</span><span style="text-align:right">Paid</span><span style="text-align:right">Due</span></div>';
+  const row = (r, i, filler) => {
+    const od = r.overdue;
+    const late = r.history && /^([1-9])/.test(r.history);
+    const pill = !filler && showH && r['due-key'] && r.history ? '<span class="' + (V.fresh('history') ? 'fmrun-k-enter' : '') + '" style="animation-delay:' + (i * 0.25).toFixed(2) + 's;display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:10px;font-weight:900;white-space:nowrap;padding:2px 7px;border-radius:999px;background:' + (late ? '#FDECEA' : '#F0EEFF') + ';color:' + (late ? RED : '#6557FF') + '">Paid late ' + esc(r.history) + '</span>' : '';
+    return '<div class="' + (filler ? '' : V.mark('row-' + (i + 1))) + '" style="display:grid;' + grid + ';gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid #EEF0F1;font-size:12.5px;color:' + INK + ';background:#fff">' + box +
+      '<span style="color:' + BLUE + '">' + esc(r.number) + '</span><span style="display:flex;align-items:center;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(r.to) + '</span>' + pill + '</span>' +
+      '<span style="color:' + SUB + '">' + esc(r.date || '') + '</span>' +
+      '<span style="display:flex;flex-direction:column;line-height:1.25"><span>' + esc(r.due) + '</span>' + (od ? '<span style="font-size:10.5px;font-weight:700;color:' + RED + '">' + esc(od) + ' overdue</span>' : '') + '</span>' +
+      '<span style="text-align:right;color:' + SUB + '">0.00</span><span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:700">' + esc(r.amount) + '</span></div>';
+  };
+  const rows = c.rows || [];
+  const nDue = rows.filter((r) => r['due-key']).length;
+  const showRows = '<div class="' + V.mark('due') + '" style="border-radius:4px">' + rows.slice(0, nDue).map((r, i) => row(r, i, false)).join('') + '</div>' + rows.slice(nDue).map((r, i) => row(r, i + nDue, false)).join('');
+  const body = streamWrap(showRows, (c.stream || []).map((r, i) => row(r, i, true)).join(''), rows.length, (c.stream || []).length, V);
+  const nav = ['Dashboard', 'Business', 'Accounting', 'Payroll', 'Contacts'].map((t) => '<span style="padding:0 9px;color:#fff;font-weight:700;' + (t === 'Business' ? '' : 'opacity:.92') + '">' + t + '</span>').join('');
+  const icons = ['M12 5v14M5 12h14', IC.search, 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9', 'M12 17h.01M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3'].map((d) => lic(d, 14, '#fff')).join('<span style="width:10px"></span>');
+  const seg = (t, on, n) => '<span style="padding:6px 12px;font-size:12px;white-space:nowrap;border:1px solid #D6DADD;margin-left:-1px;' + (on ? 'background:#fff;color:' + INK + ';font-weight:700;border-bottom-color:#fff' : 'background:#F4F5F6;color:' + SUB) + '">' + t + (on ? ' (<span class="' + V.mark('count') + '" style="font-variant-numeric:tabular-nums">' + counter(cnt.from, String(cnt.to || '').replace(/\D+$/, ''), V.on('count'), V.fresh('count'), V.dur) + '</span>)' : '') + '</span>';
+  const tabs = seg('All') + seg('Draft') + seg('Awaiting Approval') + seg('Awaiting Payment', true) + seg('Paid') + seg('Repeating');
+  return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:#fff;font-family:\'Inter\',\'Lato\',system-ui,sans-serif">' +
+    '<div style="height:42px;flex:none;background:' + BAR + ';display:flex;align-items:center;gap:6px;padding:0 12px;font-size:12.5px">' +
+    '<span style="display:flex;align-items:center;gap:7px;background:' + ORG + ';color:#fff;font-weight:800;padding:6px 10px;border-radius:3px;margin-right:6px">' + wsTile(18, 4, '#1F4D3A', '#F2C27B') + esc(WS.n) + '</span>' + nav +
+    '<span style="margin-left:auto;display:flex;align-items:center">' + icons + '<span style="width:12px"></span>' + avatar(c.user || 'priya-rao', 24) + '</span></div>' +
+    '<div style="flex:none;background:#F2F3F4;padding:10px 16px 0">' +
+    '<div style="font-size:11px;font-weight:700;color:' + BLUE + '">Sales overview ›</div><div style="font-size:19px;font-weight:800;color:' + INK + ';margin:1px 0 8px">Invoices</div>' +
+    '<div style="display:flex;padding-left:1px">' + tabs + '</div></div>' +
+    '<div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 16px 0"><div style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid ' + LINE + ';border-bottom:0">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#F7F8F9;border-bottom:1px solid ' + LINE + '"><span style="display:flex;gap:6px">' + [28, 80, 110].map((w) => '<span style="width:' + w + 'px;height:20px;border:1px solid #D6DADD;border-radius:3px;background:#fff;display:flex;align-items:center;padding:0 6px"><span class="fmrun-sk" style="width:100%;height:6px"></span></span>').join('') + '</span><span style="font-size:11.5px;font-weight:700;color:' + BLUE + ';border:1px solid #D6DADD;border-radius:3px;padding:3px 9px;background:#fff">Search</span></div>' +
+    head + '<div class="fmrun-listbox">' + body + '</div></div></div></div>';
+}
+FRAMES.InvoiceList = xeroInvoices;
+SKINS.InvoiceList = { xero: xeroInvoices };
+
+/* ---------- email: Outlook ---------- */
+/* Keys as the email frame (draft, paragraph-n, actions) plus item-n (a message in the list appears). */
+function outlookEmail(c, V, step) {
+  const BLUE = '#0F6CBD', LINE = '#E1DFDD', INK = '#242424', SUB = '#616161';
+  const from = CAST[c.from] || { n: c.from || '' };
+  const items = c.list || [{ to: c.to, subject: c.subject, time: c.time || '', preview: (c.paragraphs || [])[1] || '' }];
+  const sent = /sent/i.test(c.state || '');
+  const folder = (t, n, on) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-radius:4px;font-size:12px;' + (on ? 'background:#E1EBF7;font-weight:700;color:' + INK : 'color:' + INK) + '"><span>' + t + '</span>' + (n ? '<span style="font-size:11px;color:' + (on ? INK : BLUE) + ';font-weight:700">' + n + '</span>' : '') + '</div>';
+  const list = items.map((it, i) => {
+    const k = 'item-' + (i + 1);
+    const on = V.on(k);
+    return on ? '<div class="' + V.enter(k) + V.mark(k) + '" style="padding:9px 10px 9px 12px;border-bottom:1px solid ' + LINE + ';' + (i === 0 ? 'background:#E1EBF7;box-shadow:inset 3px 0 0 ' + BLUE + ';' : 'background:#fff;') + 'display:flex;flex-direction:column;gap:2px;min-width:0">' +
+      '<div style="display:flex;justify-content:space-between;gap:6px;font-size:12px"><b style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:' + INK + '">' + esc(it.to) + '</b><span style="color:' + SUB + ';font-size:11px;flex:none">' + esc(it.time) + '</span></div>' +
+      '<span style="font-size:11.5px;color:' + BLUE + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.subject) + '</span><span style="font-size:11px;color:' + SUB + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.preview) + '</span></div>' : '';
+  }).join('') + [1, 2, 3].map(() => '<div style="padding:10px 12px;border-bottom:1px solid ' + LINE + ';display:flex;flex-direction:column;gap:6px"><span class="fmrun-sk" style="width:55%"></span><span class="fmrun-sk" style="width:80%;background:#F3F2F1"></span></div>').join('');
+  const linkify = (t) => esc(t).replace(/(Pay invoice [A-Z]+-\d+)/, '<span style="color:' + BLUE + ';text-decoration:underline">$1</span>');
+  const ps = (c.paragraphs || []).map((p, i) => '<span class="fmrun-fx ' + V.cls('paragraph-' + (i + 1)) + '">' + linkify(p) + '</span>').join('');
+  const acts = (c.actions || []).length ? '<div class="' + V.cls('actions') + '" style="display:flex;justify-content:flex-end;gap:8px;padding-top:6px">' + c.actions.map((a, i, all) => '<span class="fmrun-act" style="font-weight:700;font-size:12px;padding:6px 14px;border-radius:4px;' + (i === all.length - 1 ? 'background:' + BLUE + ';color:#fff' : 'background:#fff;border:1px solid #D1D1D1') + '">' + esc(a) + '</span>').join('') + '</div>' : '';
+  const reading = '<div class="' + V.cls('draft') + '" style="flex:1;min-width:0;background:#fff;border-radius:6px;margin:8px 8px 0 0;padding:16px 18px;display:flex;flex-direction:column;gap:10px;overflow:hidden">' +
+    '<div style="font-size:16px;font-weight:700;color:' + INK + ';line-height:1.3">' + esc(c.subject) + '</div>' +
+    '<div style="display:flex;align-items:center;gap:10px">' + avatar(c.from, 34) + '<div style="flex:1;min-width:0;font-size:12px;line-height:1.4"><b style="color:' + INK + '">' + esc(from.n) + '</b>' + (c.fromEmail ? ' <span style="color:' + SUB + '">&lt;' + esc(c.fromEmail) + '&gt;</span>' : '') + '<br><span style="color:' + SUB + '">To: ' + esc(c.to) + '</span></div>' + (sent ? '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#0E7A0D;background:#DFF6DD;border-radius:4px;padding:3px 8px">' + svg(CHECK, 12, '#0E7A0D', 3) + 'Sent ' + esc(items[0].time || '') + '</span>' : '') + '</div>' +
+    '<div style="font-size:13px;line-height:1.55;color:' + INK + ';display:flex;flex-direction:column;gap:8px;border-top:1px solid ' + LINE + ';padding-top:12px">' + ps + '</div>' + acts + '</div>';
+  const rail = '<div class="fmrun-side" style="width:44px;flex:none;display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:12px">' + ['M4 6h16v12H4zM4 7l8 6 8-6', 'M4 5h16v15H4zM4 9h16', 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 19c0-3 2-5 5-5s5 2 5 5', 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'].map((d, i) => '<span style="width:28px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;' + (i === 0 ? 'background:#E1EBF7;color:' + BLUE : 'color:' + SUB) + '">' + lic(d, 16) + '</span>').join('') + '</div>';
+  const folders = '<div class="fmrun-side" style="width:128px;flex:none;padding:10px 6px;display:flex;flex-direction:column;gap:2px"><span style="display:block;background:' + BLUE + ';color:#fff;font-size:12px;font-weight:700;padding:7px 10px;border-radius:4px;margin-bottom:8px;text-align:center">New mail</span>' +
+    folder('Inbox', '12') + folder('Drafts', '') + folder('Sent Items', '', sent) + folder('Archive', '') + folder('Deleted Items', '') + '</div>';
+  const listPane = '<div style="width:205px;flex:none;background:#fff;border-radius:6px 0 0 0;margin-top:8px;margin-right:8px;overflow:hidden;display:flex;flex-direction:column"><div style="padding:9px 12px;font-size:13px;font-weight:700;color:' + INK + ';border-bottom:1px solid ' + LINE + '">' + (sent ? 'Sent Items' : 'Drafts') + '</div>' + list + '</div>';
+  return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:#F5F5F5;font-family:\'Segoe UI\',\'Inter\',\'Lato\',system-ui,sans-serif">' +
+    '<div style="height:40px;flex:none;background:' + BLUE + ';display:flex;align-items:center;gap:10px;padding:0 12px;color:#fff;font-size:13px;font-weight:700">' + lic('M4 4h4v4H4zM10 4h4v4h-4zM16 4h4v4h-4zM4 10h4v4H4zM10 10h4v4h-4zM16 10h4v4h-4zM4 16h4v4H4zM10 16h4v4h-4zM16 16h4v4h-4z', 15, '#fff') + '<span style="width:26px;height:26px;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center">' + appChip(step.app, 18) + '</span><span>Outlook</span><span style="margin-left:24px;flex:1;max-width:340px;height:26px;border-radius:4px;background:rgba(255,255,255,.88);display:flex;align-items:center;gap:6px;padding:0 10px;color:' + SUB + ';font-size:12px;font-weight:400">' + lic(IC.search, 12, SUB) + 'Search</span><span style="margin-left:auto">' + avatar(c.from, 26) + '</span></div>' +
+    '<div style="flex:1;min-height:0;display:flex">' + rail + folders + listPane + reading + '</div></div>';
+}
+SKINS.email = Object.assign(SKINS.email || {}, { outlook: outlookEmail });
 
 function renderFrame(step, V) {
   const f = step.frame || {};
@@ -912,8 +1004,9 @@ function renderHero(s) {
     workspace: ['rules', 'rule-#', 'memory', 'output'],
     'crm-record': ['note', 'activity', 'stage'],
     'task-list': ['rows', 'row-#', 'assignees', 'dates'],
-    email: ['draft', 'paragraph-#', 'actions'],
-    chat: ['message-#', 'card', 'actions'],
+    email: ['draft', 'paragraph-#', 'actions', 'item-#'],
+    InvoiceList: ['stream', 'count', 'due', 'history', 'row-#'],
+    chat: ['message-#', 'card', 'actions', 'inputs'],
     'lead-list': ['rows', 'row-#', 'stream', 'count', 'titles', 'scores', 'reasons', 'status', 'comments', 'icebreakers'],
     'social-post': ['post', 'text', 'stats', 'age', 'verdict', 'comments', 'comment-#'],
     'post-list': ['rows', 'row-#', 'stream', 'count', 'drops', 'verdicts', 'kept'],
